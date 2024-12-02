@@ -2,36 +2,56 @@ package main
 
 import (
 	"bufio"
-	"container/heap"
 	"fmt"
 	"io"
 	"math"
 	"os"
+	"sort"
 	"strconv"
 )
 
-// An IntHeap is a min-heap of ints.
-type IntHeap []int
+func getDistances(a []int, b []int) (int, error) {
+	if len(a) != len(b) {
+		return 0, fmt.Errorf("Lists are not the same length")
+	}
 
-func (h IntHeap) Len() int           { return len(h) }
-func (h IntHeap) Less(i, j int) bool { return h[i] < h[j] }
-func (h IntHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+	totalDiff := 0.0
 
-func (h *IntHeap) Push(x any) {
-	// Push and Pop use pointer receivers because they modify the slice's length,
-	// not just its contents.
-	*h = append(*h, x.(int))
+	for i := 0; i < len(a); i++ {
+		x := a[i]
+		y := b[i]
+
+		distance := math.Abs(float64(x) - float64(y))
+		totalDiff += distance
+	}
+
+	return int(totalDiff), nil
 }
 
-func (h *IntHeap) Pop() any {
-	old := *h
-	n := len(old)
-	x := old[n-1]
-	*h = old[0 : n-1]
-	return x
+func getSimilarity(a []int, b []int) int {
+	freq := make(map[int]int)
+
+	similarity := 0
+
+	for i := 0; i < len(a); i++ {
+		if _, ok := freq[a[i]]; !ok {
+			for j := 0; j < len(b); j++ {
+				if b[j] == a[i] {
+					freq[a[i]] += 1
+				}
+			}
+		}
+
+		if v, ok := freq[a[i]]; ok {
+			similarity += (a[i] * v)
+		}
+	}
+
+	return similarity
 }
 
 func main() {
+
 	if len(os.Args) < 2 {
 		panic("must provide input file")
 	}
@@ -45,10 +65,8 @@ func main() {
 
 	fileReader := bufio.NewReader(file)
 
-	heapOne := &IntHeap{}
-	heap.Init(heapOne)
-	heapTwo := &IntHeap{}
-	heap.Init(heapTwo)
+	listOne := make([]int, 0)
+	listTwo := make([]int, 0)
 
 	for {
 		readBytes, readErr := fileReader.ReadBytes('\n')
@@ -68,25 +86,30 @@ func main() {
 			panic("error reading number")
 		}
 
-		heap.Push(heapOne, firstNum)
+		listOne = append(listOne, firstNum)
 
 		secondNum, err := strconv.Atoi(string(secondBytes))
 		if err != nil {
 			panic("error reading number")
 		}
 
-		heap.Push(heapTwo, secondNum)
+		listTwo = append(listTwo, secondNum)
 	}
 
-	totalDiff := 0.0
+	sort.Slice(listOne, func(a int, b int) bool {
+		return listOne[a] < listOne[b]
+	})
 
-	for heapOne.Len() > 0 {
-		firstNum := heap.Pop(heapOne)
-		secondNum := heap.Pop(heapTwo)
+	sort.Slice(listTwo, func(a int, b int) bool {
+		return listTwo[a] < listTwo[b]
+	})
 
-		absDiff := math.Abs(float64(secondNum.(int) - firstNum.(int)))
-		totalDiff += absDiff
+	distance, err := getDistances(listOne, listTwo)
+	if err != nil {
+		panic(err)
 	}
 
-	fmt.Printf("Total distance = %f\n", totalDiff)
+	fmt.Printf("Total distance = %d\n", distance)
+
+	fmt.Printf("Similarity = %d\n", getSimilarity(listOne, listTwo))
 }
