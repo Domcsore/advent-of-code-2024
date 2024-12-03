@@ -1,28 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
+	"github.com/domcsore/advent-of-code-2024/util"
 	"io"
-	"os"
 	"strconv"
 )
-
-func openFileFromArgs() *bufio.Reader {
-	if len(os.Args) < 2 {
-		panic("Must have input file as argument")
-	}
-
-	inputPath := os.Args[1]
-
-	file, err := os.Open(inputPath)
-	if err != nil {
-		panic(err)
-	}
-
-	return bufio.NewReader(file)
-}
 
 func getLevelFromLine(levelLine []byte) []int {
 	levelLine = levelLine[:len(levelLine)-1]
@@ -105,7 +89,7 @@ func IsSafeWithRemovedLevel(level []int) bool {
 }
 
 func main() {
-	inputFileReader := openFileFromArgs()
+	inputFileReader := util.OpenFileFromArgs()
 
 	safeCount := 0
 	safeCountWithDrop := 0

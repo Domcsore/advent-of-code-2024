@@ -1,4 +1,4 @@
-module github.com/domcsore/advent-of-code-2024/1
+module github.com/domcsore/advent-of-code-2024/3
 
 replace github.com/domcsore/advent-of-code-2024/util => ../util
 

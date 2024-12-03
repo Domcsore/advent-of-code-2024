@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/domcsore/advent-of-code-2024/util"
 	"io"
 	"math"
 	"os"
@@ -52,18 +53,7 @@ func getSimilarity(a []int, b []int) int {
 
 func main() {
 
-	if len(os.Args) < 2 {
-		panic("must provide input file")
-	}
-
-	inputPath := os.Args[1]
-
-	file, err := os.Open(inputPath)
-	if err != nil {
-		panic(err)
-	}
-
-	fileReader := bufio.NewReader(file)
+	fileReader := util.OpenFileFromArgs()
 
 	listOne := make([]int, 0)
 	listTwo := make([]int, 0)
