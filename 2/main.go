@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"strconv"
 )
@@ -51,30 +50,65 @@ func abs(x int) int {
 	}
 }
 
-func isSafe(level []int) bool {
-	isSafe := true
-	isSigned := false
+func IsDistanceSafe(a int, b int) bool {
+	distance := abs(a - b)
+	if distance < 1 || distance > 3 {
+		return false
+	} else {
+		return true
+	}
+}
+
+func IsLevelSafe(level []int) bool {
+	isAscending := true
+	isDescending := true
+
 	for i := 1; i < len(level); i++ {
-		diff := level[i-1] - level[i]
-		absDiff := abs(diff)
-		if absDiff > 3 || absDiff < 1 {
-			isSafe = false
+
+		if !IsDistanceSafe(level[i-1], level[i]) {
+			return false
 		}
 
-		if i == 1 {
-			isSigned = math.Signbit(float64(diff))
-		} else if math.Signbit(float64(diff)) != isSigned {
-			isSafe = false
+		if level[i-1] >= level[i] {
+			isAscending = false
+		}
+
+		if level[i-1] <= level[i] {
+			isDescending = false
 		}
 	}
 
-	return isSafe
+	return isAscending || isDescending
+}
+
+func RemoveIndex(level []int, index int) []int {
+	newLevel := make([]int, 0)
+	newLevel = append(newLevel, level[:index]...)
+	newLevel = append(newLevel, level[index+1:]...)
+
+	return newLevel
+}
+
+func IsSafeWithRemovedLevel(level []int) bool {
+	if IsLevelSafe(level) {
+		return true
+	}
+
+	for i := 0; i < len(level); i++ {
+		newLevel := RemoveIndex(level, i)
+		if IsLevelSafe(newLevel) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func main() {
 	inputFileReader := openFileFromArgs()
 
 	safeCount := 0
+	safeCountWithDrop := 0
 
 	for {
 		levelLine, err := inputFileReader.ReadBytes('\n')
@@ -83,11 +117,17 @@ func main() {
 		}
 
 		level := getLevelFromLine(levelLine)
-		levelIsSafe := isSafe(level)
+		levelIsSafe := IsLevelSafe(level)
 		if levelIsSafe {
 			safeCount++
 		}
+
+		levelIsSafeWithDrop := IsSafeWithRemovedLevel(level)
+		if levelIsSafeWithDrop {
+			safeCountWithDrop++
+		}
 	}
 
-	fmt.Printf("Safe levels = %d", safeCount)
+	fmt.Printf("Safe levels = %d\n", safeCount)
+	fmt.Printf("Safe levels with drop = %d\n", safeCountWithDrop)
 }
