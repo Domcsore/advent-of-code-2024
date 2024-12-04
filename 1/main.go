@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/domcsore/advent-of-code-2024/util"
 	"io"
 	"math"
-	"os"
 	"sort"
 	"strconv"
 )
